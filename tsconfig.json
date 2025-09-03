@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
+
+    "rootDir": "./api",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["api/*"]
+    },
+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+
+    "types": ["node"]
+  },
+  "include": ["api"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "image-optimizer",
+  "description": "A Harper component for storing and retrieving optimized images",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+		"dev": "tsc; harperdb dev ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "sharp": "^0.34.3",
+    "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/sharp": "^0.31.1"
+  }
+}
