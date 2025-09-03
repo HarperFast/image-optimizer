@@ -15,8 +15,9 @@ A website can use this API to improve performance and user experience:
 + If the variant exists, it is returned instantly. If not, the API generates the optimized variant, stores it for future use, and returns it to the client.
 
 ## Getting Started
-`git clone https://github.com/HarperDB/image-optimizer.git
-cd image-optimizer`
+`git clone https://github.com/HarperDB/image-optimizer.git`
+
+`cd image-optimizer`
 
 `npm run dev`
 
