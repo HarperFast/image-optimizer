@@ -6,21 +6,14 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "moduleDetection": "force",
-
     "rootDir": "./api",
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["api/*"]
-    },
-
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "resolveJsonModule": true,
-
     "types": ["node"]
   },
   "include": ["api"],
