@@ -9,8 +9,8 @@ const VariantsTable = databases.ImageOptimization.image_variants;
 export class ImageVariant extends Resource {
 	static loadAsInstance = false;
 
-	allowRead(user: User) {
-		return user?.role?.id === 'super_user';
+	allowRead() {
+		return true;
 	}
 
 	// Retrieve or generate an image variant using a cache key
