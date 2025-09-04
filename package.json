@@ -10,7 +10,7 @@
 		"format": "prettier --write .",
 		"test": "ts-node api/resources.test.js"
 	},
-	"keywords": [],
+	"keywords": ["harper", "image", "optimizer", "sharp", "performance", "cache"],
 	"author": "HarperDB, Inc.",
 	"license": "ISC",
 	"dependencies": {
