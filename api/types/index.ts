@@ -1,4 +1,4 @@
-export type VariantFormat = "webp" | "jpeg" | "avif" | "png";
+export type VariantFormat = 'webp' | 'jpeg' | 'avif' | 'png';
 
 export interface User {
 	username: string;

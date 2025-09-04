@@ -1,17 +1,17 @@
 type Image @table(database: "ImageOptimization") @sealed @export(name: "images") {
-  id: ID! @primaryKey
-  blob: Blob
-  contentType: String
-  createdAt: Date
+	id: ID! @primaryKey
+	blob: Blob
+	contentType: String
+	createdAt: Date
 }
 
 type ImageVariant @table(database: "ImageOptimization", expiration: "1d") @sealed @export(name: "image_variants") {
-  id: ID! @primaryKey
-  imageId: String @indexed
-  format: String @indexed
-  width: Int @indexed
-  dpr: Float
-  blob: Blob
-  createdAt: Date
-  updatedAt: Date
+	id: ID! @primaryKey
+	imageId: String @indexed
+	format: String @indexed
+	width: Int @indexed
+	dpr: Float
+	blob: Blob
+	createdAt: Date
+	updatedAt: Date
 }
