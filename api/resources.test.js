@@ -1,5 +1,6 @@
 import test, { beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { databases } from 'harperdb';
 
 globalThis.createBlob = (bytes) => new Blob([bytes]);
 
@@ -33,8 +34,8 @@ const FakeVariantsTable = {
   sourcedFrom(/* Images */) { /* no-op for tests */ },
 };
 
-globalThis.databases.ImageOptimization.images = FakeImagesTable;
-globalThis.databases.ImageOptimization.image_variants = FakeVariantsTable;
+databases.ImageOptimization.images = FakeImagesTable;
+databases.ImageOptimization.image_variants = FakeVariantsTable;
 
 const { ImageVariant, Images } = await import('../dist/resources.js');
 import { parseCacheKey } from '../dist/utils/index.js';
