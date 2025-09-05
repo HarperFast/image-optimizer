@@ -125,7 +125,7 @@ export class ImageVariant extends Resource {
 
         return {
             status: 200,
-            headers: { 'Content-Type': 'image/webp' },
+            headers: { 'Content-Type': formatToContentType(format) },
             body: record.blob,
         };
     }
@@ -221,14 +221,6 @@ export class Images extends Resource {
             logger.error('No image id provided in PUT request');
             const err: any = new Error('No image id provided in PUT request');
             err.statusCode = 400;
-            throw err;
-        }
-
-        const existing = await ImagesTable.get(id);
-        if (!existing) {
-            logger.error('Image id not found for PUT:', id);
-            const err: any = new Error('Image id not found');
-            err.statusCode = 404;
             throw err;
         }
 
