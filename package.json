@@ -28,6 +28,7 @@
 		"@harperdb/code-guidelines": "^0.0.2",
 		"@types/node": "^24.3.0",
 		"@types/sharp": "^0.31.1",
+		"harperdb": "^4.6.8",
 		"prettier": "^3.6.2",
 		"ts-node": "^10.9.2"
 	}
