@@ -3,8 +3,6 @@ import assert from 'node:assert/strict';
 
 globalThis.createBlob = (bytes) => new Blob([bytes]);
 
-import { databases } from 'harperdb';
-
 const imagesStore = new Map();
 const variantsStore = new Map();
 
