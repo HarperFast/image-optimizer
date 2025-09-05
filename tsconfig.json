@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "ES2022",
-		"lib": ["ES2022"],
+		"lib": ["ES2022", "DOM"],
 		"outDir": "./dist",
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
@@ -14,7 +14,7 @@
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"resolveJsonModule": true,
-		"types": ["node"]
+		"types": ["node", "harperdb"]
 	},
 	"include": ["api"],
 	"exclude": ["node_modules", "dist"]
