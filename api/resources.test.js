@@ -33,8 +33,8 @@ const FakeVariantsTable = {
   sourcedFrom(/* Images */) { /* no-op for tests */ },
 };
 
-databases.ImageOptimization.images = FakeImagesTable;
-databases.ImageOptimization.image_variants = FakeVariantsTable;
+globalThis.databases.ImageOptimization.images = FakeImagesTable;
+globalThis.databases.ImageOptimization.image_variants = FakeVariantsTable;
 
 const { ImageVariant, Images } = await import('../dist/resources.js');
 import { parseCacheKey } from '../dist/utils/index.js';
