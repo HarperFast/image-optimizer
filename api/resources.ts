@@ -21,7 +21,7 @@ export class ImageVariant extends Resource {
         if (typeof rawId !== 'string') {
             logger.error('ImageVariant.get called with invalid id:', target);
             const err: any = new Error('Missing image id');
-            err.status = 400;
+            err.statusCode = 400;
             throw err;
         }
 
@@ -29,7 +29,7 @@ export class ImageVariant extends Resource {
         if (!parsed) {
             logger.warn('ImageVariant.get called with malformed cache key:', rawId);
             const err: any = new Error('Malformed cache key, expected `${imageId}_${width|orig}_${dpr}_{webp|jpeg|avif|png}`');
-            err.status = 400;
+            err.statusCode = 400;
             throw err;
         }
 
@@ -99,7 +99,7 @@ export class ImageVariant extends Resource {
             variantBuf = await sharpInstance.toBuffer();
         } catch (err: any) {
             logger.error('Variant generation failed:', err);
-            err.status = 500;
+            err.statusCode = 500;
             throw err;
         }
 
@@ -107,7 +107,7 @@ export class ImageVariant extends Resource {
         const record = {
             imageId,
             format,
-            width, // requested CSS px width (null = orig)
+            width, // requested CSS px width
             dpr, // device pixel ratio
             blob: createBlob(variantBuf),
             contentType,
@@ -171,8 +171,6 @@ export class Images extends Resource {
             createdAt: new Date().toISOString(),
         });
 
-        logger.info('blob:', newResource.blob);
-
         logger.info('Image stored with id:', newResource.id);
         return {
             status: 201,
@@ -213,13 +211,26 @@ export class Images extends Resource {
             throw err;
         }
 
-        // Respect request param first
         const id =
             (typeof target?.get === 'function' && target.get('id')) ||
             target?.data?.id ||
             target?.headers?.['x-image-id'] ||
-            (data as any)?.id ||
-            Math.random().toString(36).slice(2, 10);
+            (data as any)?.id
+
+        if (!id) {
+            logger.error('No image id provided in PUT request');
+            const err: any = new Error('No image id provided in PUT request');
+            err.statusCode = 400;
+            throw err;
+        }
+
+        const existing = await ImagesTable.get(id);
+        if (!existing) {
+            logger.error('Image id not found for PUT:', id);
+            const err: any = new Error('Image id not found');
+            err.statusCode = 404;
+            throw err;
+        }
 
         await ImagesTable.put({
             id,
