@@ -3,6 +3,8 @@ import { Resource, databases, logger } from 'harperdb';
 import { parseCacheKey, formatToContentType } from './utils/index.js';
 import { User } from './types/index.js';
 
+declare const createBlob: (bytes: Buffer | Uint8Array, type?: string) => Blob;
+
 const ImagesTable = databases.ImageOptimization.images;
 const VariantsTable = databases.ImageOptimization.image_variants;
 
