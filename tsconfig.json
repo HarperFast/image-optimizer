@@ -14,7 +14,7 @@
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"resolveJsonModule": true,
-		"types": ["node", "harperdb"]
+		"types": ["node"]
 	},
 	"include": ["api"],
 	"exclude": ["node_modules", "dist"]
