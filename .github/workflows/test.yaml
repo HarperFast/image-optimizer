@@ -26,24 +26,47 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # - name: Install Harper CLI
-      #   run: npm install -g harperdb
+      - name: Install Harper CLI
+        run: npm install -g harperdb
 
-      # - name: Setup Harper
-      #   env:
-      #     TC_AGREEMENT: 'yes'
-      #     HDB_ADMIN_USERNAME: 'admin'
-      #     HDB_ADMIN_PASSWORD: 'password'
-      #     ROOTPATH: '/tmp/hdb'
-      #     OPERATIONSAPI_NETWORK_PORT: 9925
-      #     LOGGING_LEVEL: 'debug'
-      #     LOGGING_STDSTREAMS: true
-      #     THREADS_COUNT: 1
-      #     THREADS_DEBUG: false
-      #   run: harperdb install
+      - name: Setup Harper
+        env:
+          TC_AGREEMENT: 'yes'
+          HDB_ADMIN_USERNAME: 'admin'
+          HDB_ADMIN_PASSWORD: 'password'
+          ROOTPATH: '/tmp/hdb'
+          OPERATIONSAPI_NETWORK_PORT: 9925
+          LOGGING_LEVEL: 'debug'
+          LOGGING_STDSTREAMS: true
+          THREADS_COUNT: 1
+          THREADS_DEBUG: false
+        run: harperdb install
 
       - name: Build
         run: npm run build
+      
+      - name: Start HarperDB
+        run: harperdb start &
+      
+      - name: Wait for HarperDB to start
+        run: sleep 10
 
       - name: Run tests
+        env:
+          HDB_HOST: 'localhost'
+          HDB_PORT: '9925'
+          HDB_USERNAME: 'admin'
+          HDB_PASSWORD: 'password'
         run: npm test
+      
+      - name: Upload HarperDB logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harperdb-logs
+          path: /tmp/hdb/log/hdb.log
+          retention-days: 7
+      
+      - name: Stop HarperDB
+        if: always()
+        run: harperdb stop
