@@ -26,6 +26,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Harper CLI
+        run: npm install -g harperdb
+
+      - name: Setup Harper
+        env:
+          TC_AGREEMENT: 'yes'
+          HDB_ADMIN_USERNAME: 'admin'
+          HDB_ADMIN_PASSWORD: 'password'
+          ROOTPATH: '/tmp/hdb'
+          OPERATIONSAPI_NETWORK_PORT: 9925
+          LOGGING_LEVEL: 'debug'
+          LOGGING_STDSTREAMS: true
+          THREADS_COUNT: 1
+          THREADS_DEBUG: false
+        run: harperdb install
+
       - name: Build
         run: npm run build
 
