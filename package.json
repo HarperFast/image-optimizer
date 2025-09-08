@@ -8,7 +8,7 @@
 		"build": "tsc",
 		"dev": "tsc; harperdb dev .",
 		"format": "prettier --write .",
-		"test": "ts-node api/resources.test.js"
+		"test": "node --test api/newResources.test.js"
 	},
 	"keywords": [
 		"harper",
@@ -21,6 +21,7 @@
 	"author": "HarperDB, Inc.",
 	"license": "ISC",
 	"dependencies": {
+		"harperdb": "^4.6.8",
 		"sharp": "^0.34.3",
 		"typescript": "^5.9.2"
 	},
