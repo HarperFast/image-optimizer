@@ -22,6 +22,33 @@ On each request:
 - Variants are automatically reused for future requests with the same cache key.
 - When an original image is replaced in `/Images`, all of its associated cached variants are purged so they can be regenerated on demand.
 
+```mermaid
+flowchart TD
+    classDef client fill:#46C497,stroke:#41338A,stroke-width:2,color:#41338A;
+    classDef api fill:#892674,stroke:#41338A,stroke-width:2,color:#fff;
+    classDef db fill:#66A38A,stroke:#41338A,stroke-width:2,color:#41338A;
+    classDef process fill:#41338A,stroke:#46C497,stroke-width:2,color:#fff;
+
+    A[Client]:::client -->|POST /images| B[Images.post]:::api
+    B -->|Validate & Store Image| C[ImagesTable.create]:::db
+    C -->|Returns Image ID| D[Client]:::client
+
+    A -->|PUT /images| E[Images.put]:::api
+    E -->|Validate & Upsert Image| F[ImagesTable.put]:::db
+    F -->|Purge Variants| G[VariantsTable.query]:::db
+    G -->|Delete Old Variants| H[VariantsTable.delete]:::db
+    F -->|Returns Image ID| D
+
+    A -->|GET /image-variant| I[ImageVariant.get]:::api
+    I -->|Parse Cache Key| J[parseCacheKey]:::process
+    I -->|Check Cache| K[VariantsTable.get]:::db
+    K -- Cached --> D
+    K -- Miss --> L[ImagesTable.get]:::db
+    L -->|Generate Variant| M[sharp]:::process
+    M -->|Store Variant| N[VariantsTable.put]:::db
+    N -->|Return Variant| D
+```
+
 ## Database Structure and Table Overview
 
 - **Database**: `ImageOptimization`
@@ -67,7 +94,8 @@ Create the tables:
 	"table": "images",
 	"primary_key": "id"
 }
-
+```
+```json
 {
 	"operation": "create_table",
 	"database": "ImageOptimization",
@@ -96,6 +124,37 @@ Or in Postman:
 - Set method to GET
 - Set URL to `http://localhost:9926/ImageVariant?id=abc123_400_2_webp`
 - In Authorization tab, select "Basic Auth" and enter your HarperDB username and password
+
+### List all images (GET)
+
+Use curl or Postman to retrieve a list of all stored images and their metadata (with Basic Auth). This endpoint returns an array of image objects, each containing the image ID, creation date, and content type. This makes it easy to discover available images and use their IDs for variant requests or updates.
+
+```sh
+curl -u username:password \
+  "http://localhost:9926/Images"
+```
+
+Or in Postman:
+
+- Set method to GET
+- Set URL to `http://localhost:9926/Images`
+- In Authorization tab, select "Basic Auth" and enter your HarperDB username and password
+
+**Example response:**
+```json
+[
+  {
+    "id": "abc123",
+    "createdAt": "2025-09-08T12:34:56.789Z",
+    "contentType": "image/png"
+  },
+  {
+    "id": "def456",
+    "createdAt": "2025-09-08T12:35:10.123Z",
+    "contentType": "image/jpeg"
+  }
+]
+```
 
 ### Upload an image (POST)
 

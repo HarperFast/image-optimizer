@@ -47,9 +47,9 @@ export class ImageVariant extends Resource {
             }
             return cached;
         }
-
+        
         // Load original
-        const image = await ImagesTable.get(imageId);
+        const image = await ImagesTable.get(+imageId);
         if (!image?.blob) {
             const err: any = new Error('Image not found');
             err.statusCode = 404;
@@ -166,7 +166,7 @@ export class Images extends Resource {
             err.statusCode = 400;
             throw err;
         }
-
+        
         const newResource = await ImagesTable.create({
             blob: createBlob(bytes),
             contentType: target?.headers?.['content-type'] || 'application/octet-stream',
