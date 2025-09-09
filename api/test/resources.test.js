@@ -1,6 +1,7 @@
-import { describe, before, after, it } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'fs/promises';
+import { fileURLToPath } from 'url';
 import path from 'path';
 
 const API_URL = 'http://localhost:9926';
@@ -18,12 +19,15 @@ async function uploadImage(filePath) {
 	});
 	const json = await res.json();
 	assert.equal(res.status, 201);
-	return json.data.id;
+	return json.id;
 }
 
 async function getImageVariant(imageId, width, dpr, format) {
 	const cacheKey = `${imageId}_${width}_${dpr}_${format}`;
 	const res = await fetch(`${API_URL}/ImageVariant?id=${cacheKey}`);
+	if (res.status !== 200) {
+		console.log('Variant error response:', res.status, await res.text());
+	}
 	assert.equal(res.status, 200);
 	return await res.blob();
 }
@@ -50,8 +54,8 @@ describe('Image Optimizer API Integration', () => {
 		});
 		const json = await res.json();
 		assert.equal(res.status, 200);
-		assert.equal(json.data.id, newImageId);
-		
+		assert.equal(+json.id, newImageId);
+
 		const variantBlob = await getImageVariant(newImageId, 300, 2, 'webp');
 		assert.ok(variantBlob.size > 0);
 	});
