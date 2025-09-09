@@ -18,6 +18,9 @@
 		"performance",
 		"cache"
 	],
+  "engines": {
+    "node": ">=22.0.0"
+  },
 	"author": "HarperDB, Inc.",
 	"license": "Apache-2.0",
 	"dependencies": {
