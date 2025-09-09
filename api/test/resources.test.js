@@ -45,6 +45,14 @@ describe('Image Optimizer API Integration', () => {
 		assert.ok(variantBlob.size > 0);
 	});
 
+	it('should return a cached variant on repeated requests', async () => {
+		const variantBlob1 = await getImageVariant(imageId, 300, 2, 'webp');
+		const variantBlob2 = await getImageVariant(imageId, 300, 2, 'webp');
+		assert.ok(variantBlob1.size > 0);
+		assert.ok(variantBlob2.size > 0);
+		assert.equal(variantBlob1.size, variantBlob2.size);
+	});
+
 	it('should update an image and purge old variants', async () => {
 		const newImageId = await uploadImage(TEST_IMAGE_PATH);
 		const res = await fetch(`${API_URL}/Images?id=${newImageId}`, {
@@ -60,7 +68,7 @@ describe('Image Optimizer API Integration', () => {
 		assert.ok(variantBlob.size > 0);
 	});
 
-	it('should handle invalid uploads gracefully', async () => {
+	it('should return 400 for invalid image uploads', async () => {
 		const res = await fetch(`${API_URL}/Images`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'image/png' },
@@ -69,5 +77,15 @@ describe('Image Optimizer API Integration', () => {
 		assert.equal(res.status, 400);
 		const json = await res.json();
 		assert.ok(json);
+	});
+
+	it('should return 400 for missing parameters in image variant request', async () => {
+		const res = await fetch(`${API_URL}/ImageVariant`);
+		assert.equal(res.status, 400);
+	});
+
+	it('should return 404 for non-existent image variant', async () => {
+		const res = await fetch(`${API_URL}/ImageVariant/nonexistent_300_2_webp`);
+		assert.equal(res.status, 404);
 	});
 });

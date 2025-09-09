@@ -1,6 +1,6 @@
 # Image Optimizer
 
-This component provides a REST API for uploading and retrieving optimized images using Harper as the backend. Images are stored as Blobs in their original format and can be dynamically resized and converted to modern formats (WebP, AVIF, JPEG) for efficient delivery to any device. It supports automatic variant caching, so once an image variant (by size, DPR, and format) is generated, it is stored in the `image_variants` table and reused for subsequent requests.
+This application provides a REST API for uploading and retrieving optimized images using Harper as the backend. Images are stored as Blobs in their original format and can be dynamically resized and converted to modern formats (WebP, AVIF, JPEG) for efficient delivery to any device. It supports automatic variant caching, so once an image variant (by size, DPR, and format) is generated, it is stored in the `image_variants` table and reused for subsequent requests.
 
 A website can use this API to improve performance and user experience:
 
@@ -24,22 +24,22 @@ On each request:
 
 ```mermaid
 flowchart TD
-    classDef client fill:#46C497,stroke:#41338A,stroke-width:2,color:#41338A;
-    classDef api fill:#892674,stroke:#41338A,stroke-width:2,color:#fff;
-    classDef db fill:#66A38A,stroke:#41338A,stroke-width:2,color:#41338A;
-    classDef process fill:#41338A,stroke:#46C497,stroke-width:2,color:#fff;
+    classDef client fill:#1DE9A9,stroke:#40368B,stroke-width:2,color:#231F20,font-weight:bold;
+    classDef api fill:#C723FF,stroke:#564D8D,stroke-width:2,color:#fff,font-weight:bold;
+    classDef db fill:#861EFF,stroke:#40368B,stroke-width:2,color:#fff,font-weight:bold;
+    classDef process fill:#563C88,stroke:#42C196,stroke-width:2,color:#fff,font-weight:bold;
 
-    A[Client]:::client -->|POST /images| B[Images.post]:::api
+    A[Client]:::client -->|POST /Images| B[Images.post]:::api
     B -->|Validate & Store Image| C[ImagesTable.create]:::db
     C -->|Returns Image ID| D[Client]:::client
 
-    A -->|PUT /images| E[Images.put]:::api
+    A -->|PUT /Images| E[Images.put]:::api
     E -->|Validate & Upsert Image| F[ImagesTable.put]:::db
     F -->|Purge Variants| G[VariantsTable.query]:::db
     G -->|Delete Old Variants| H[VariantsTable.delete]:::db
     F -->|Returns Image ID| D
 
-    A -->|GET /image-variant| I[ImageVariant.get]:::api
+    A -->|GET /ImageVariant| I[ImageVariant.get]:::api
     I -->|Parse Cache Key| J[parseCacheKey]:::process
     I -->|Check Cache| K[VariantsTable.get]:::db
     K -- Cached --> D
@@ -108,7 +108,7 @@ Create the tables:
 
 ### Retrieve a cached or on-demand variant image (GET)
 
-Use curl or Postman to fetch an optimized image variant (with Basic Auth). Requests go through /ImageVariant and use a cache key:
+Use curl or Postman to fetch an optimized image variant. Requests go through /ImageVariant and use a cache key:
 
 ```bash
 ${imageId}_${width|orig}_${dpr}_${format}
@@ -124,37 +124,6 @@ Or in Postman:
 - Set method to GET
 - Set URL to `http://localhost:9926/ImageVariant?id=abc123_400_2_webp`
 - In Authorization tab, select "Basic Auth" and enter your HarperDB username and password
-
-### List all images (GET)
-
-Use curl or Postman to retrieve a list of all stored images and their metadata (with Basic Auth). This endpoint returns an array of image objects, each containing the image ID, creation date, and content type. This makes it easy to discover available images and use their IDs for variant requests or updates.
-
-```sh
-curl -u username:password \
-  "http://localhost:9926/Images"
-```
-
-Or in Postman:
-
-- Set method to GET
-- Set URL to `http://localhost:9926/Images`
-- In Authorization tab, select "Basic Auth" and enter your HarperDB username and password
-
-**Example response:**
-```json
-[
-  {
-    "id": "abc123",
-    "createdAt": "2025-09-08T12:34:56.789Z",
-    "contentType": "image/png"
-  },
-  {
-    "id": "def456",
-    "createdAt": "2025-09-08T12:35:10.123Z",
-    "contentType": "image/jpeg"
-  }
-]
-```
 
 ### Upload an image (POST)
 
@@ -193,3 +162,27 @@ Or in Postman:
 - In Body, select `binary` and choose your image file
 - Set header `Content-Type: image/png` (or your image type)
 - In Authorization tab, select "Basic Auth" and enter your HarperDB username and password
+
+## Testing
+
+This application uses Node's built-in test runner for integration tests. The tests interact with a running HarperDB instance and the API endpoints, simulating real-world usage. Key flows covered include image upload, variant generation and caching, image updates, and error handling.
+
+- **Test Environment Setup:**
+  - HarperDB is started and configured before tests run (see `.github/workflows/test.yaml` for CI setup).
+  - The required database (`ImageOptimization`) and tables (`images`, `image_variants`) are created automatically using the HarperDB operations API.
+  - A valid test image is placed in the test directory and used for upload scenarios.
+
+- **Test Execution:**
+  - Tests use real HTTP requests to interact with the API endpoints (`/Images`, `/ImageVariant`).
+  - Each test checks for correct status codes, response bodies, and expected side effects (e.g., caching, purging variants).
+  - Error scenarios (invalid uploads, missing data, malformed requests) are also covered to ensure robust handling.
+
+- **Running Tests Locally:**
+  - Make sure HarperDB is running and the database/tables are set up.
+  - Run `npm test` to execute the test suite.
+
+- **Running Tests in CI:**
+  - The GitHub Actions workflow (`.github/workflows/test.yaml`) automates HarperDB setup, database/table creation, and test execution.
+  - Logs are uploaded for debugging if any tests fail.
+
+  > **Note:** Integration tests require a valid image file named test-image.png in the test directory. Make sure this file exists and is a real image (not empty or corrupted) before running tests locally or in CI.
