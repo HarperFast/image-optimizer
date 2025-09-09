@@ -4,7 +4,10 @@ import fs from 'fs/promises';
 import path from 'path';
 
 const API_URL = 'http://localhost:9926';
-const TEST_IMAGE_PATH = path.join(__dirname, 'test-image.png'); 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const TEST_IMAGE_PATH = path.join(__dirname, 'test-image.png');
 
 async function uploadImage(filePath) {
 	const imageData = await fs.readFile(filePath);
