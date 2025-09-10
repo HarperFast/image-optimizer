@@ -1,16 +1,7 @@
 import { VariantFormat } from 'api/types/index.js';
 
 export function formatToContentType(fmt: VariantFormat) {
-	switch (fmt) {
-		case 'webp':
-			return 'image/webp';
-		case 'jpeg':
-			return 'image/jpeg';
-		case 'avif':
-			return 'image/avif';
-		case 'png':
-			return 'image/png';
-	}
+	return `image/${fmt}`;
 }
 
 export function parseCacheKey(rawId: string) {
