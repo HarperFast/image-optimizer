@@ -168,7 +168,7 @@ Or in Postman:
 This application uses Node.js' built-in test runner for integration tests. The tests interact with a running Harper instance and the API endpoints, simulating real-world usage. Key flows covered include image upload, variant generation and caching, image updates, and error handling.
 
 - **Test Environment Setup:**
-  - HarperDB is started and configured before tests run (see `.github/workflows/test.yaml` for CI setup).
+  - Harper is started and configured before tests run (see `.github/workflows/test.yaml` for CI setup).
   - The required database (`ImageOptimization`) and tables (`images`, `image_variants`) are created automatically using the HarperDB operations API.
   - A valid test image is placed in the test directory and used for upload scenarios.
 
