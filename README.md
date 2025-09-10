@@ -127,7 +127,7 @@ Or in Postman:
 
 ### Upload an image (POST)
 
-Use curl or Postman to upload an image (with Basic Auth). The image will be stored as a Blob:
+Use any HTTP client to upload an image (with Basic Auth). The image will be stored as a Blob:
 
 ```sh
 curl --data-binary @your-image.png \
