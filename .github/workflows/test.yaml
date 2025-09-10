@@ -52,32 +52,18 @@ jobs:
         run: |
           harperdb start
           sleep 10
-      
-      - name: Create ImageOptimization database
-        run: |
-          curl -u admin:password \
-            -H "Content-Type: application/json" \
-            -d '{"operation":"create_database","database":"ImageOptimization"}' \
-            http://localhost:9925
-
-      - name: Create images table
-        run: |
-          curl -u admin:password \
-            -H "Content-Type: application/json" \
-            -d '{"operation":"create_table","database":"ImageOptimization","table":"images","primary_key":"id"}' \
-            http://localhost:9925
-
-      - name: Create image_variants table
-        run: |
-          curl -u admin:password \
-            -H "Content-Type: application/json" \
-            -d '{"operation":"create_table","database":"ImageOptimization","table":"image_variants","primary_key":"id"}' \
-            http://localhost:9925
 
       - name: Deploy Application
         run: |
           harperdb deploy project=image-optimizer restart=true
           sleep 10
+
+      - name: Restart HarperDB
+        run: |
+          curl -u admin:password \
+            -H "Content-Type: application/json" \
+            -d '{"operation":"restart"}' \
+            http://localhost:9925
 
       - name: Run tests
         env:
