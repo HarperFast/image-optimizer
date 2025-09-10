@@ -11,7 +11,8 @@ type ImageVariant @table(database: "ImageOptimization", expiration: "1d") @seale
 	format: String @indexed
 	width: Int @indexed
 	dpr: Float
-	blob: Blob
+	blob: Blob,
+  contentType: String
 	createdAt: Date
 	updatedAt: Date
 }

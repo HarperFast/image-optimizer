@@ -35,21 +35,28 @@ export class ImageVariant extends Resource {
             throw err;
         }
 
-        const { imageId, width, dpr, format, cacheKey } = parsed;
-        logger.info('ImageVariant.get:', { cacheKey, imageId, width, dpr, format });
+    const { imageId, width, dpr, format, cacheKey } = parsed;
+    logger.info('ImageVariant.get:', { cacheKey, imageId, width, dpr, format });
 
-        // Cache lookup
-        const cached = await VariantsTable.get(cacheKey);
+    // Cache lookup
+    const cached = await VariantsTable.get(cacheKey);
         if (cached?.blob) {
             // Normalize blob type for response
             if (Buffer.isBuffer(cached.blob)) {
                 cached.blob = createBlob(cached.blob);
             }
-            return cached;
+            return {
+                status: 200,
+                headers: {
+                    'Content-Type': formatToContentType(format),
+                    'X-Cache': 'HIT'
+                },
+                body: cached.blob
+            };
         }
-        
-        // Load original
-        const image = await ImagesTable.get(+imageId);
+
+    // Load original
+    const image = await ImagesTable.get(+imageId);
         if (!image?.blob) {
             const err: any = new Error('Image not found');
             err.statusCode = 404;
@@ -107,16 +114,16 @@ export class ImageVariant extends Resource {
 
         const contentType = formatToContentType(format);
         const record = {
+            // id: cacheKey,
             imageId,
             format,
             width, // requested CSS px width
             dpr, // device pixel ratio
             blob: createBlob(variantBuf),
             contentType,
-            bytes: variantBuf.length,
             createdAt: new Date().toISOString(),
         };
-
+        console.log('Storing variant record:', record);
         // Persist in cache table
         try {
             await VariantsTable.put(record);
@@ -127,7 +134,10 @@ export class ImageVariant extends Resource {
 
         return {
             status: 200,
-            headers: { 'Content-Type': formatToContentType(format) },
+            headers: {
+                'Content-Type': formatToContentType(format),
+                'X-Cache': 'MISS'
+            },
             body: record.blob,
         };
     }
@@ -166,7 +176,7 @@ export class Images extends Resource {
             err.statusCode = 400;
             throw err;
         }
-        
+
         const newResource = await ImagesTable.create({
             blob: createBlob(bytes),
             contentType: target?.headers?.['content-type'] || 'application/octet-stream',
