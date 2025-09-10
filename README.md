@@ -108,7 +108,7 @@ Create the tables:
 
 ### Retrieve a cached or on-demand variant image (GET)
 
-Use curl or Postman to fetch an optimized image variant. Requests go through /ImageVariant and use a cache key:
+Use any HTTP client to fetch an optimized image variant. Requests go through /ImageVariant and use a cache key:
 
 ```bash
 ${imageId}_${width|orig}_${dpr}_${format}
