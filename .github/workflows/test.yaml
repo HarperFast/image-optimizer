@@ -94,14 +94,6 @@ jobs:
           name: harperdb-logs
           path: /tmp/hdb/log/hdb.log
           retention-days: 7
-      
-      - name: Clean up database
-        if: always()
-        run: |
-          curl -u admin:password \
-            -H "Content-Type: application/json" \
-            -d '{"operation":"drop_database","database":"ImageOptimization"}' \
-            http://localhost:9925
 
       - name: Stop HarperDB
         if: always()

@@ -1,17 +1,15 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'fs/promises';
-import { fileURLToPath } from 'url';
+import fs from 'fs';
+import fsPromises from 'fs/promises';
 import path from 'path';
 
 const API_URL = 'http://localhost:9926';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-const TEST_IMAGE_PATH = path.join(__dirname, 'test-image.png');
+const TEST_IMAGE_PATH = path.join(import.meta.dirname, 'test-image.png');
 
 async function uploadImage(filePath) {
-	const imageData = await fs.readFile(filePath);
+	const imageData = await fsPromises.readFile(filePath);
 	const res = await fetch(`${API_URL}/Images`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'image/png' },
@@ -40,6 +38,19 @@ describe('Image Optimizer API Integration', () => {
 		assert.ok(imageId);
 	});
 
+	it('should upload an image as a stream and return an ID', async () => {
+		const imageDataStream = fs.createReadStream(TEST_IMAGE_PATH);
+		const res = await fetch(`${API_URL}/Images`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'image/png' },
+			body: imageDataStream,
+			duplex: 'half'
+		});
+		assert.equal(res.status, 201);
+		const json = await res.json();
+		assert.ok(json.id);
+	});
+
 	it('should generate and cache an image variant', async () => {
 		const variantBlob = await getImageVariant(imageId, 300, 2, 'webp');
 		assert.ok(variantBlob.size > 0);
@@ -58,7 +69,7 @@ describe('Image Optimizer API Integration', () => {
 		const res = await fetch(`${API_URL}/Images?id=${newImageId}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'image/png' },
-			body: await fs.readFile(TEST_IMAGE_PATH),
+			body: await fsPromises.readFile(TEST_IMAGE_PATH),
 		});
 		const json = await res.json();
 		assert.equal(res.status, 200);
