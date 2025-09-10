@@ -178,7 +178,7 @@ This application uses Node.js' built-in test runner for integration tests. The t
   - Error scenarios (invalid uploads, missing data, malformed requests) are also covered to ensure robust handling.
 
 - **Running Tests Locally:**
-  - Make sure HarperDB is running and the database/tables are set up.
+  - Make sure Harper is running and the database/tables are set up.
   - Run `npm test` to execute the test suite.
 
 - **Running Tests in CI:**
