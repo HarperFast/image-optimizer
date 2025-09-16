@@ -16,28 +16,28 @@ export class ImageVariant extends Resource {
 
     // Retrieve or generate an image variant using a cache key
     async get(target: any) {
-    const rawId =
-        (typeof target?.get === 'function' && target.get('id')) || (typeof target === 'string' ? target : target?.id);
+        const rawId =
+            (typeof target?.get === 'function' && target.get('id')) || (typeof target === 'string' ? target : target?.id);
 
-    if (typeof rawId !== 'string') {
-        logger.error('ImageVariant.get called with invalid id:', target);
-        const err: any = new Error('Missing image id');
-        err.statusCode = 400;
-        throw err;
-    }
+        if (typeof rawId !== 'string') {
+            logger.error('ImageVariant.get called with invalid id:', target);
+            const err: any = new Error('Missing image id');
+            err.statusCode = 400;
+            throw err;
+        }
 
-    const parsed = parseCacheKey(rawId);
-    console.log('Parsed cache key:', parsed);
-    if (!parsed) {
-        logger.warn('ImageVariant.get called with malformed cache key:', rawId);
-        const err: any = new Error('Malformed cache key, expected `${imageId}_${width|orig}_${dpr}_{webp|jpeg|avif|png}`');
-        err.statusCode = 400;
-        throw err;
-    }
+        const parsed = parseCacheKey(rawId);
 
-    const { imageId, width, dpr, format, cacheKey } = parsed;
+        if (!parsed) {
+            logger.warn('ImageVariant.get called with malformed cache key:', rawId);
+            const err: any = new Error('Malformed cache key, expected `${imageId}_${width|orig}_${dpr}_{webp|jpeg|avif|png}`');
+            err.statusCode = 400;
+            throw err;
+        }
 
-    // Cache lookup
+        const { imageId, width, dpr, format, cacheKey } = parsed;
+
+        // Cache lookup
         let cached;
         try {
             cached = await VariantsTable.get(cacheKey);
@@ -59,76 +59,76 @@ export class ImageVariant extends Resource {
             };
         }
 
-    // Yield to event loop after cache miss
-    await new Promise(resolve => setImmediate(resolve));
+        // Yield to event loop after cache miss
+        await new Promise(resolve => setImmediate(resolve));
 
-    // Load original
-    let image;
-    try {
+        // Load original
+        let image;
+        try {
             image = await ImagesTable.get(imageId);
-    } catch (err) {
-        logger.error('ImagesTable.get failed:', err);
-        throw err;
-    }
-    if (!image?.blob) {
+        } catch (err) {
+            logger.error('ImagesTable.get failed:', err);
+            throw err;
+        }
+        if (!image?.blob) {
             logger.error('Image not found for imageId:', imageId);
             const err: any = new Error('Image not found');
-        err.statusCode = 404;
-        throw err;
-    }
+            err.statusCode = 404;
+            throw err;
+        }
 
-    let originalBuf: Buffer;
-    if (image.blob instanceof Blob) {
-        originalBuf = Buffer.from(await image.blob.arrayBuffer());
-    } else if (Buffer.isBuffer(image.blob)) {
-        originalBuf = image.blob;
-    } else if ((image.blob as any)?.data) {
-        originalBuf = Buffer.from((image.blob as any).data);
-    } else {
-        logger.error('Unsupported original image blob type for image:', imageId);
-        const err: any = new Error('Unsupported original image blob type');
-        err.statusCode = 400;
-        throw err;
-    }
+        let originalBuf: Buffer;
+        if (image.blob instanceof Blob) {
+            originalBuf = Buffer.from(await image.blob.arrayBuffer());
+        } else if (Buffer.isBuffer(image.blob)) {
+            originalBuf = image.blob;
+        } else if ((image.blob as any)?.data) {
+            originalBuf = Buffer.from((image.blob as any).data);
+        } else {
+            logger.error('Unsupported original image blob type for image:', imageId);
+            const err: any = new Error('Unsupported original image blob type');
+            err.statusCode = 400;
+            throw err;
+        }
 
-    // Generate variant
-    let sharpInstance = sharp(originalBuf, { failOnError: false });
+        // Generate variant
+        let sharpInstance = sharp(originalBuf, { failOnError: false });
 
-    if (width) {
-        sharpInstance = sharpInstance.resize({
-            width: Math.max(1, Math.floor(width * dpr)),
-            withoutEnlargement: true,
-        });
-    }
+        if (width) {
+            sharpInstance = sharpInstance.resize({
+                width: Math.max(1, Math.floor(width * dpr)),
+                withoutEnlargement: true,
+            });
+        }
 
-    switch (format) {
-        case 'webp':
-            sharpInstance = sharpInstance.webp({ quality: 75 });
-            break;
-        case 'jpeg':
-            sharpInstance = sharpInstance.jpeg({ quality: 80, mozjpeg: true });
-            break;
-        case 'avif':
-            sharpInstance = sharpInstance.avif({ quality: 50 });
-            break;
-        case 'png':
-            sharpInstance = sharpInstance.png();
-            break;
-    }
+        switch (format) {
+            case 'webp':
+                sharpInstance = sharpInstance.webp({ quality: 75 });
+                break;
+            case 'jpeg':
+                sharpInstance = sharpInstance.jpeg({ quality: 80, mozjpeg: true });
+                break;
+            case 'avif':
+                sharpInstance = sharpInstance.avif({ quality: 50 });
+                break;
+            case 'png':
+                sharpInstance = sharpInstance.png();
+                break;
+        }
 
-    // Yield to event loop before heavy buffer operation
-    await new Promise(resolve => setImmediate(resolve));
+        // Yield to event loop before heavy buffer operation
+        await new Promise(resolve => setImmediate(resolve));
 
-    let variantBuf: Buffer;
-    try {
-        variantBuf = await sharpInstance.toBuffer();
-    } catch (err: any) {
-        logger.error('Variant generation failed:', err);
-        err.statusCode = 500;
-        throw err;
-    }
+        let variantBuf: Buffer;
+        try {
+            variantBuf = await sharpInstance.toBuffer();
+        } catch (err: any) {
+            logger.error('Variant generation failed:', err);
+            err.statusCode = 500;
+            throw err;
+        }
 
-    const contentType = formatToContentType(format);
+        const contentType = formatToContentType(format);
 
         const record = {
             id: cacheKey,
@@ -142,21 +142,21 @@ export class ImageVariant extends Resource {
             updatedAt: new Date().toISOString(),
         };
 
-    try {
-        const recordResult = await VariantsTable.put(record);
-    } catch (err: any) {
-        logger.error('Failed to persist image variant:', { cacheKey, err, record });
-    }
+        try {
+            const recordResult = await VariantsTable.put(record);
+        } catch (err: any) {
+            logger.error('Failed to persist image variant:', { cacheKey, err, record });
+        }
 
-    return {
-        status: 200,
-        headers: {
-            'Content-Type': formatToContentType(format),
-            'X-Cache': 'MISS'
-        },
-        body: record.blob,
-    };
-}
+        return {
+            status: 200,
+            headers: {
+                'Content-Type': formatToContentType(format),
+                'X-Cache': 'MISS'
+            },
+            body: record.blob,
+        };
+    }
 }
 
 export class Images extends Resource {
@@ -175,7 +175,10 @@ export class Images extends Resource {
     async get(target: any) {
         const rawId =
             (typeof target?.get === 'function' && target.get('id')) ||
-            target?.id;
+            target?.id ||
+            target?.query?.id ||
+            target?.data?.id ||
+            target?.headers?.['x-image-id'];
 
         if (typeof rawId === 'string' && parseCacheKey(rawId)) {
             const variants = new ImageVariant();
@@ -184,6 +187,7 @@ export class Images extends Resource {
 
         const image = await ImagesTable.get(rawId);
         if (!image?.blob) {
+            logger.error('Image not found for id:', rawId);
             const err: any = new Error('Image not found');
             err.statusCode = 404;
             throw err;
@@ -241,8 +245,15 @@ export class Images extends Resource {
 
     // Upload or update original image with a specified id
     async put(target: any, data: any) {
-        let bytes: Buffer | Uint8Array;
+        const id =
+            (typeof target?.get === 'function' && target.get('id')) ||
+            target?.id ||
+            target?.query?.id ||
+            target?.data?.id ||
+            target?.headers?.['x-image-id'] ||
+            (data as any)?.id;
 
+        let bytes: Buffer | Uint8Array;
         if (Buffer.isBuffer(data?.data)) {
             bytes = data.data;
         } else if (typeof data?.data?.arrayBuffer === 'function') {
@@ -271,31 +282,20 @@ export class Images extends Resource {
             throw err;
         }
 
-        const id =
-            (typeof target?.get === 'function' && target.get('id')) ||
-            target?.data?.id ||
-            target?.headers?.['x-image-id'] ||
-            (data as any)?.id
-
-        if (typeof id === 'string' && parseCacheKey(id)) {
-            const err: any = new Error('PUT /images only supports numeric image ids, not cache keys');
-            err.statusCode = 400;
-            throw err;
-        }
-
-        if (!id) {
-            logger.error('No image id provided in PUT request');
-            const err: any = new Error('No image id provided in PUT request');
-            err.statusCode = 400;
-            throw err;
-        }
-
-        await ImagesTable.put({
+        const putObj = {
             id,
             blob: createBlob(bytes),
             contentType: target?.headers?.['content-type'] || 'application/octet-stream',
             updatedAt: new Date().toISOString(),
-        });
+        };
+
+        let putResult;
+        try {
+            putResult = await ImagesTable.put(putObj);
+        } catch (err) {
+            logger.error('Images.put: ImagesTable.put failed:', err);
+            throw err;
+        }
 
         // Purge existing variants for this image so cache can repopulate lazily
         try {

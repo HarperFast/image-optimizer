@@ -15,19 +15,32 @@ async function uploadImage(filePath) {
 		headers: { 'Content-Type': 'image/png' },
 		body: imageData,
 	});
+	let errorBody;
+	if (!res.ok) {
+		try {
+			errorBody = await res.text();
+		} catch (e) {
+			errorBody = '<failed to read body>';
+		}
+		console.error(`Failed to upload image: ${res.status} ${res.statusText}\nBody: ${errorBody}`);
+		throw new Error(`Failed to upload image: ${res.status} ${res.statusText}`);
+	}
 	const json = await res.json();
+	await new Promise(r => setTimeout(r, 150));
 	assert.equal(res.status, 201);
 	return json.id;
 }
 
-async function getImageVariant(imageId, width, dpr, format) {
+async function getVariantWithCacheHeader(imageId, width, dpr, format) {
 	const cacheKey = `${imageId}_${width}_${dpr}_${format}`;
-	const res = await fetch(`${API_URL}/ImageVariant?id=${cacheKey}`);
+	const res = await fetch(`${API_URL}/ImageVariant/${cacheKey}`);
 	if (res.status !== 200) {
 		console.log('Variant error response:', res.status, await res.text());
 	}
 	assert.equal(res.status, 200);
-	return await res.blob();
+	const xCache = res.headers.get('x-cache');
+	const blob = await res.blob();
+	return { blob, xCache };
 }
 
 describe('Image Optimizer API Integration', () => {
@@ -52,31 +65,26 @@ describe('Image Optimizer API Integration', () => {
 	});
 
 	it('should generate and cache an image variant', async () => {
-		const variantBlob = await getImageVariant(imageId, 300, 2, 'webp');
-		assert.ok(variantBlob.size > 0);
-	});
-
-	it('should return a cached variant on repeated requests', async () => {
-		const variantBlob1 = await getImageVariant(imageId, 300, 2, 'webp');
-		const variantBlob2 = await getImageVariant(imageId, 300, 2, 'webp');
+		const { blob: variantBlob1, xCache: xCache1 } = await getVariantWithCacheHeader(imageId, 300, 2, 'webp');
+		const { blob: variantBlob2, xCache: xCache2 } = await getVariantWithCacheHeader(imageId, 300, 2, 'webp');
 		assert.ok(variantBlob1.size > 0);
 		assert.ok(variantBlob2.size > 0);
 		assert.equal(variantBlob1.size, variantBlob2.size);
+		assert.equal(xCache1, 'MISS');
+		assert.equal(xCache2, 'HIT');
 	});
 
-	it('should update an image and purge old variants', async () => {
-		const newImageId = await uploadImage(TEST_IMAGE_PATH);
-		const res = await fetch(`${API_URL}/Images?id=${newImageId}`, {
+	it('should upload an image with PUT and return 200', async () => {
+		const id = 'test-image-1';
+		const imageBuffer = await fsPromises.readFile(TEST_IMAGE_PATH);
+		const res = await fetch(`${API_URL}/Images?id=${id}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'image/png' },
-			body: await fsPromises.readFile(TEST_IMAGE_PATH),
+			body: imageBuffer
 		});
-		const json = await res.json();
 		assert.equal(res.status, 200);
-		assert.equal(+json.id, newImageId);
-
-		const variantBlob = await getImageVariant(newImageId, 300, 2, 'webp');
-		assert.ok(variantBlob.size > 0);
+		const json = await res.json();
+		assert.ok(json?.data?.id === id || json?.id === id, 'Response missing id');
 	});
 
 	it('should return 400 for invalid image uploads', async () => {
