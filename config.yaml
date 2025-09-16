@@ -5,3 +5,6 @@ graphqlSchema:
 
 jsResource:
   files: 'dist/resources.js'
+
+logging:
+  auditLog: false
