@@ -16,15 +16,7 @@ async function uploadImage(filePath) {
 		body: imageData,
 	});
 	let errorBody;
-	if (!res.ok) {
-		try {
-			errorBody = await res.text();
-		} catch (e) {
-			errorBody = '<failed to read body>';
-		}
-		console.error(`Failed to upload image: ${res.status} ${res.statusText}\nBody: ${errorBody}`);
-		throw new Error(`Failed to upload image: ${res.status} ${res.statusText}`);
-	}
+	assert.ok(res.ok);
 	const json = await res.json();
 	await new Promise(r => setTimeout(r, 150));
 	assert.equal(res.status, 201);
