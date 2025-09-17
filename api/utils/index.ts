@@ -1,5 +1,11 @@
 import { VariantFormat } from 'api/types/index.js';
 
+function assertFormat(format: string): asserts format is VariantFormat {
+  if (!['webp', 'jpeg', 'avif', 'png'].includes(format)) {
+    throw new Error('Invalid format');
+  }
+}
+
 export function formatToContentType(fmt: VariantFormat) {
 	return `image/${fmt}`;
 }
@@ -13,8 +19,14 @@ export function parseCacheKey(rawId: string) {
 	const [imageId, widthRaw, dprRaw, formatRaw] = parts;
 	const format = formatRaw?.toLowerCase() as VariantFormat;
 
+
 	if (!imageId || !/^[a-z0-9_-]+$/i.test(imageId)) return null;
-	if (!['webp', 'jpeg', 'avif', 'png'].includes(format)) return null;
+	
+	try {
+		assertFormat(format);
+	} catch (err) {
+		return null;
+	}
 
 	const width = widthRaw === 'orig' ? null : Number.parseInt(widthRaw ?? '', 10);
 	if (widthRaw !== 'orig' && (!Number.isFinite(width!) || width! <= 0)) return null;

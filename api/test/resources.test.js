@@ -15,7 +15,6 @@ async function uploadImage(filePath) {
 		headers: { 'Content-Type': 'image/png' },
 		body: imageData,
 	});
-	let errorBody;
 	assert.ok(res.ok);
 	const json = await res.json();
 	await new Promise(r => setTimeout(r, 150));
@@ -26,9 +25,6 @@ async function uploadImage(filePath) {
 async function getVariantWithCacheHeader(imageId, width, dpr, format) {
 	const cacheKey = `${imageId}_${width}_${dpr}_${format}`;
 	const res = await fetch(`${API_URL}/ImageVariant/${cacheKey}`);
-	if (res.status !== 200) {
-		console.log('Variant error response:', res.status, await res.text());
-	}
 	assert.equal(res.status, 200);
 	const xCache = res.headers.get('x-cache');
 	const blob = await res.blob();
@@ -62,6 +58,8 @@ describe('Image Optimizer API Integration', () => {
 		assert.ok(variantBlob1.size > 0);
 		assert.ok(variantBlob2.size > 0);
 		assert.equal(variantBlob1.size, variantBlob2.size);
+		assert.ok(xCache1, 'x-cache header missing on first variant');
+    	assert.ok(xCache2, 'x-cache header missing on second variant');
 		assert.equal(xCache1, 'MISS');
 		assert.equal(xCache2, 'HIT');
 	});
