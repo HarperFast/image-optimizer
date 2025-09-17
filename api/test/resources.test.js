@@ -55,11 +55,11 @@ describe('Image Optimizer API Integration', () => {
 	it('should generate and cache an image variant', async () => {
 		const { blob: variantBlob1, xCache: xCache1 } = await getVariantWithCacheHeader(imageId, 300, 2, 'webp');
 		const { blob: variantBlob2, xCache: xCache2 } = await getVariantWithCacheHeader(imageId, 300, 2, 'webp');
+		assert.ok(xCache1, 'x-cache header missing on first variant');
+    	assert.ok(xCache2, 'x-cache header missing on second variant');
 		assert.ok(variantBlob1.size > 0);
 		assert.ok(variantBlob2.size > 0);
 		assert.equal(variantBlob1.size, variantBlob2.size);
-		assert.ok(xCache1, 'x-cache header missing on first variant');
-    	assert.ok(xCache2, 'x-cache header missing on second variant');
 		assert.equal(xCache1, 'MISS');
 		assert.equal(xCache2, 'HIT');
 	});

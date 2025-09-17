@@ -19,9 +19,8 @@ export function parseCacheKey(rawId: string) {
 	const [imageId, widthRaw, dprRaw, formatRaw] = parts;
 	const format = formatRaw?.toLowerCase() as VariantFormat;
 
-
 	if (!imageId || !/^[a-z0-9_-]+$/i.test(imageId)) return null;
-	
+
 	try {
 		assertFormat(format);
 	} catch (err) {
