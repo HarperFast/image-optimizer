@@ -143,7 +143,7 @@ export class ImageVariant extends Resource {
         };
 
         try {
-            const recordResult = await VariantsTable.put(record);
+            await VariantsTable.put(record);
         } catch (err: any) {
             logger.error('Failed to persist image variant:', { cacheKey, err, record });
         }
@@ -289,9 +289,8 @@ export class Images extends Resource {
             updatedAt: new Date().toISOString(),
         };
 
-        let putResult;
         try {
-            putResult = await ImagesTable.put(putObj);
+            await ImagesTable.put(putObj);
         } catch (err) {
             logger.error('Images.put: ImagesTable.put failed:', err);
             throw err;

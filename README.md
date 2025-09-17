@@ -76,34 +76,6 @@ npm run dev
 
 This assumes you have the Harper stack already [installed](https://docs.harperdb.io/docs/deployments/install-harper) globally.
 
-> **Note:** Ensure Harper `component` is running with databases and tables created for `resources.ts`. You can do this using the operations API (http://localhost:9925). 
-
-Create the database:
-```json
-{
-	"operation": "create_database",
-	"database": "ImageOptimization"
-}
-```
-
-Create the tables:
-```json
-{
-	"operation": "create_table",
-	"database": "ImageOptimization",
-	"table": "images",
-	"primary_key": "id"
-}
-```
-```json
-{
-	"operation": "create_table",
-	"database": "ImageOptimization",
-	"table": "image_variants",
-	"primary_key": "id"
-}
-```
-
 ## Endpoints
 
 ### Retrieve a cached or on-demand variant image (GET)
