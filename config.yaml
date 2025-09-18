@@ -1,0 +1,10 @@
+rest: true
+
+graphqlSchema:
+  files: 'schema.graphql'
+
+jsResource:
+  files: 'dist/resources.js'
+
+logging:
+  auditLog: false
