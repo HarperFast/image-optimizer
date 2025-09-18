@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import { Resource, databases, logger } from 'harperdb';
 import { parseCacheKey, formatToContentType } from './utils/index.js';
-import { User } from './types/index.js';
+import type { User } from './types/index.js';
 import { randomUUID } from 'crypto';
 
 const ImagesTable = databases.ImageOptimization.Image;
