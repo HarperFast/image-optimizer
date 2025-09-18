@@ -1,9 +1,9 @@
 import { VariantFormat } from 'api/types/index.js';
 
 function assertFormat(format: string): asserts format is VariantFormat {
-  if (!['webp', 'jpeg', 'avif', 'png'].includes(format)) {
-    throw new Error('Invalid format');
-  }
+	if (!['webp', 'jpeg', 'avif', 'png'].includes(format)) {
+		throw new Error('Invalid format');
+	}
 }
 
 export function formatToContentType(fmt: VariantFormat) {

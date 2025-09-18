@@ -17,7 +17,7 @@ async function uploadImage(filePath) {
 	});
 	assert.ok(res.ok);
 	const json = await res.json();
-	await new Promise(r => setTimeout(r, 150));
+	await new Promise((r) => setTimeout(r, 150));
 	assert.equal(res.status, 201);
 	return json.id;
 }
@@ -45,7 +45,7 @@ describe('Image Optimizer API Integration', () => {
 			method: 'POST',
 			headers: { 'Content-Type': 'image/png' },
 			body: imageDataStream,
-			duplex: 'half'
+			duplex: 'half',
 		});
 		assert.equal(res.status, 201);
 		const json = await res.json();
@@ -56,7 +56,7 @@ describe('Image Optimizer API Integration', () => {
 		const { blob: variantBlob1, xCache: xCache1 } = await getVariantWithCacheHeader(imageId, 300, 2, 'webp');
 		const { blob: variantBlob2, xCache: xCache2 } = await getVariantWithCacheHeader(imageId, 300, 2, 'webp');
 		assert.ok(xCache1, 'x-cache header missing on first variant');
-    	assert.ok(xCache2, 'x-cache header missing on second variant');
+		assert.ok(xCache2, 'x-cache header missing on second variant');
 		assert.ok(variantBlob1.size > 0);
 		assert.ok(variantBlob2.size > 0);
 		assert.equal(variantBlob1.size, variantBlob2.size);
@@ -70,7 +70,7 @@ describe('Image Optimizer API Integration', () => {
 		const res = await fetch(`${API_URL}/Images?id=${id}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'image/png' },
-			body: imageBuffer
+			body: imageBuffer,
 		});
 		assert.equal(res.status, 200);
 		const json = await res.json();
