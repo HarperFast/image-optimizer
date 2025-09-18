@@ -1,5 +1,6 @@
 {
-	"name": "image-optimizer",
+	"name": "@harperdb/image-optimizer",
+	"private": "true",
 	"description": "A Harper component for storing and retrieving optimized images",
 	"version": "1.0.0",
 	"type": "module",
