@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { Resource, databases, logger } from 'harperdb';
+import { Resource, databases, logger, createBlob } from 'harper';
 import { parseCacheKey, formatToContentType } from './utils/index.js';
 import type { User } from './types/index.js';
 import { randomUUID } from 'crypto';
@@ -302,7 +302,7 @@ export class Images extends Resource {
 			for (const variant of variants || []) {
 				const vId = (variant as any)?.id ?? variant;
 				if (typeof vId === 'string') {
-					await VariantsTable.delete(vId);
+					await VariantsTable.invalidate(vId);
 				}
 			}
 		} catch (err: any) {
@@ -317,4 +317,5 @@ export class Images extends Resource {
 	}
 }
 
-VariantsTable.sourcedFrom(ImagesTable);
+// VariantsTable variant generation is handled manually in ImageVariant.get();
+// sourcedFrom is not used here because variant IDs differ from image IDs.

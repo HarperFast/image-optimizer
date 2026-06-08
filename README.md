@@ -67,7 +67,7 @@ flowchart TD
 ## Getting Started
 
 ```
-git clone https://github.com/HarperDB/image-optimizer.git
+git clone https://github.com/HarperFast/image-optimizer.git
 
 cd image-optimizer
 
@@ -95,7 +95,7 @@ Or in Postman:
 
 - Set method to GET
 - Set URL to `http://localhost:9926/ImageVariant?id=abc123_400_2_webp`
-- In Authorization tab, select "Basic Auth" and enter your HarperDB username and password
+- In Authorization tab, select "Basic Auth" and enter your Harper username and password
 
 ### Upload an image (POST)
 
@@ -114,7 +114,7 @@ Or in Postman:
 - Set URL to `http://localhost:9926/Images`
 - In Body, select `binary` and choose your image file
 - Set header `Content-Type: image/png` (or your image type)
-- In Authorization tab, select "Basic Auth" and enter your HarperDB username and password
+- In Authorization tab, select "Basic Auth" and enter your Harper username and password
 
 ### Upload or update an image with a specific ID (PUT)
 
@@ -133,7 +133,7 @@ Or in Postman:
 - Set URL to `http://localhost:9926/Images?id=IMAGE_ID`
 - In Body, select `binary` and choose your image file
 - Set header `Content-Type: image/png` (or your image type)
-- In Authorization tab, select "Basic Auth" and enter your HarperDB username and password
+- In Authorization tab, select "Basic Auth" and enter your Harper username and password
 
 ## Testing
 
@@ -141,7 +141,7 @@ This application uses Node.js' built-in test runner for integration tests. The t
 
 - **Test Environment Setup:**
   - Harper is started and configured before tests run (see `.github/workflows/test.yaml` for CI setup).
-  - The required database (`ImageOptimization`) and tables (`images`, `image_variants`) are created automatically using the HarperDB operations API.
+  - The required database (`ImageOptimization`) and tables (`images`, `image_variants`) are created automatically via the Harper operations API.
   - A valid test image is placed in the test directory and used for upload scenarios.
 
 - **Test Execution:**
@@ -154,7 +154,7 @@ This application uses Node.js' built-in test runner for integration tests. The t
   - Run `npm test` to execute the test suite.
 
 - **Running Tests in CI:**
-  - The GitHub Actions workflow (`.github/workflows/test.yaml`) automates HarperDB setup, database/table creation, and test execution.
+  - The GitHub Actions workflow (`.github/workflows/integration-tests.yml`) automates Harper setup, database/table creation, and test execution.
   - Logs are uploaded for debugging if any tests fail.
 
   > **Note:** Integration tests require a valid image file named test-image.png in the test directory. Make sure this file exists and is a real image (not empty or corrupted) before running tests locally or in CI.
