@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { Resource, databases, logger } from 'harperdb';
+import { Resource, databases, logger, createBlob } from 'harper';
 import { parseCacheKey, formatToContentType } from './utils/index.js';
 import type { User } from './types/index.js';
 import { randomUUID } from 'crypto';
@@ -299,12 +299,17 @@ export class Images extends Resource {
 		// Purge existing variants for this image so cache can repopulate lazily
 		try {
 			const variants = await VariantsTable.query({ imageId: id });
+			// Invalidate in parallel: these are independent per-variant writes, and an
+			// image with many cached variants would otherwise serialise them all into
+			// the PUT's response time.
+			const invalidations: unknown[] = [];
 			for (const variant of variants || []) {
 				const vId = (variant as any)?.id ?? variant;
 				if (typeof vId === 'string') {
-					await VariantsTable.delete(vId);
+					invalidations.push(VariantsTable.invalidate(vId));
 				}
 			}
+			await Promise.all(invalidations);
 		} catch (err: any) {
 			logger.error('Failed to purge old variants for image:', { id, err });
 		}
@@ -317,4 +322,5 @@ export class Images extends Resource {
 	}
 }
 
-VariantsTable.sourcedFrom(ImagesTable);
+// VariantsTable variant generation is handled manually in ImageVariant.get();
+// sourcedFrom is not used here because variant IDs differ from image IDs.
