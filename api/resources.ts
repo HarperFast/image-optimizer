@@ -299,12 +299,17 @@ export class Images extends Resource {
 		// Purge existing variants for this image so cache can repopulate lazily
 		try {
 			const variants = await VariantsTable.query({ imageId: id });
+			// Invalidate in parallel: these are independent per-variant writes, and an
+			// image with many cached variants would otherwise serialise them all into
+			// the PUT's response time.
+			const invalidations: unknown[] = [];
 			for (const variant of variants || []) {
 				const vId = (variant as any)?.id ?? variant;
 				if (typeof vId === 'string') {
-					await VariantsTable.invalidate(vId);
+					invalidations.push(VariantsTable.invalidate(vId));
 				}
 			}
+			await Promise.all(invalidations);
 		} catch (err: any) {
 			logger.error('Failed to purge old variants for image:', { id, err });
 		}

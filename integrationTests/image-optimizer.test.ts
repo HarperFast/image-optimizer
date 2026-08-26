@@ -14,6 +14,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+import { Readable } from 'node:stream';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_PATH = resolve(__dirname, '..');
@@ -63,6 +65,25 @@ void suite('Image Optimizer — core upload and variant flow', (ctx: ContextWith
 	void test('POST /Images returns 201 with an image id', async () => {
 		const id = await uploadImage(ctx, TEST_IMAGE_PATH);
 		ok(typeof id === 'string' && id.length > 0, 'image id should be a non-empty string');
+	});
+
+	// Ported from the old api/test/resources.test.js, which is no longer run in CI:
+	// it drove a live Harper on localhost:9926 rather than the harness. This was the
+	// one path it covered that the integration suite did not — a streamed request body
+	// (fs.createReadStream + duplex: 'half'), which exercises Harper's chunked-upload
+	// handling rather than the buffered path every other upload test takes.
+	void test('POST /Images accepts a streamed request body', async () => {
+		const { admin, httpURL } = ctx.harper;
+		const creds = Buffer.from(`${admin.username}:${admin.password}`).toString('base64');
+		const res = await fetch(`${httpURL}/Images`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'image/png', Authorization: `Basic ${creds}` },
+			body: Readable.toWeb(createReadStream(TEST_IMAGE_PATH)) as ReadableStream<Uint8Array>,
+			duplex: 'half',
+		} as RequestInit & { duplex: 'half' });
+		strictEqual(res.status, 201, `Expected 201 for a streamed upload, got ${res.status}`);
+		const json = (await res.json()) as { id?: string; data?: { id: string } };
+		ok(json?.id ?? json?.data?.id, 'Expected an image id from the streamed upload');
 	});
 
 	void test('GET /ImageVariant generates variant on MISS and returns image bytes', async () => {
